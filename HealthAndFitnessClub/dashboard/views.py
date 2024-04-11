@@ -35,7 +35,6 @@ def sign_in(request):
     else:
         return render(request, 'login.html')
 
-
 def register(request):
     if request.method == 'POST':
         first_name = request.POST['first_name']
@@ -52,10 +51,12 @@ def register(request):
     else:
         return render(request, 'register.html')
 
-
 def sign_out(request):
-    return render(request, 'login.html')
-
+    response = redirect('/login')
+    response.delete_cookie('email')
+    response.delete_cookie('id')
+    response.delete_cookie('user_type')
+    return response
 
 def member_dashboard(request, id):
     member = Members.find_member_with_id(id)
@@ -64,7 +65,6 @@ def member_dashboard(request, id):
         return render(request, 'member_profile.html', {'user_type': 'member', 'user': member, 'goals': goals})
     else:
         return render(request, 'member_profile.html', {'msg': 'User not found'})
-
 
 def my_profile(request):
     if 'email' in request.COOKIES:
@@ -76,16 +76,16 @@ def my_profile(request):
             if user:
                 return render(request, 'my_profile.html', {'user': user, 'user_type': 'MEMBER', 'goals': goals})
         if request.COOKIES['user_type'] == 'TRAINER':
-            user = Trainers.find_trainer_with_email(email)
+            user = Trainers.find_trainer_with_id(id)
+            availabilities = Trainers.find_availabilities_with_trainer_id(id)
             if user:
-                return render(request, 'my_profile.html', {'user': user, 'user_type': 'TRAINER'})
+                return render(request, 'my_profile.html', {'user': user, 'user_type': 'TRAINER', 'availabilities': availabilities})
         if request.COOKIES['user_type'] == 'ADMINSTAFF':
-            user = AdministrativeStaff.find_admin_staff_with_email(email)
+            user = AdministrativeStaff.find_admin_staff_with_id(id)
             if user:
                 return render(request, 'my_profile.html', {'user': user, 'user_type': 'ADMINSTAFF'})
     else:
         return redirect('/login/')
-
 
 def update_info(request):
     if request.method == 'POST':
@@ -113,7 +113,6 @@ def add_goal(request):
     else:
         return redirect('/my_profile/')
     
-
 def edit_goal(request):
     if request.method == 'POST':
         goal_id = request.POST.get('goal_id')
@@ -127,12 +126,53 @@ def edit_goal(request):
     else:
         return redirect('/my_profile/')
     
-
 def delete_goal(request):
     if request.method == 'POST':
         goal_id = request.POST.get('goal_id')
 
         Members.delete_goal(goal_id, int(request.COOKIES['id']))
         return redirect('/my_profile/')
+    else:
+        return redirect('/my_profile/')
+    
+def add_availability(request):
+    if request.method == 'POST':
+        day = request.POST.get('day')
+        start_time = request.POST.get('start_time')
+        end_time = request.POST.get('end_time')
+
+        Trainers.add_availability(int(request.COOKIES['id']), day, start_time, end_time)
+        return redirect('/my_profile/')
+    else:
+        return redirect('/my_profile/')
+    
+def edit_availability(request):
+    if request.method == 'POST':
+        availability_id = request.POST.get('availability_id')
+        day = request.POST.get('day')
+        start_time = request.POST.get('start_time')
+        end_time = request.POST.get('end_time')
+
+        Trainers.edit_availability(availability_id, int(request.COOKIES['id']), day, start_time, end_time)
+        return redirect('/my_profile/')
+    else:
+        return redirect('/my_profile/')
+    
+def delete_availability(request):
+    if request.method == 'POST':
+        availability_id = request.POST.get('availability_id')
+
+        Trainers.delete_availability(availability_id, int(request.COOKIES['id']))
+        return redirect('/my_profile/')
+    else:
+        return redirect('/my_profile/')
+    
+def search_member(request):
+    if request.method == 'POST':
+        member_name = request.POST.get('member_name')
+        first_name, last_name = member_name.split()
+        user = Members.find_member_with_name(first_name, last_name)
+        id = str(user.member_id)
+        return redirect('/members/' + id + '/')
     else:
         return redirect('/my_profile/')

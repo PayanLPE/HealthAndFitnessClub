@@ -12,4 +12,8 @@ urlpatterns = [
     path('my_profile/add_goal', views.add_goal, name='add_goal'),
     path('my_profile/edit_goal', views.edit_goal, name='edit_goal'),
     path('my_profile/delete_goal', views.delete_goal, name='delete_goal'),
+    path('my_profile/add_availability', views.add_availability, name='add_availability'),
+    path('my_profile/edit_availability', views.edit_availability, name='edit_availability'),
+    path('my_profile/delete_availability', views.delete_availability, name='delete_availability'),
+    path('my_profile/search_member', views.search_member, name='search_member'),
 ]

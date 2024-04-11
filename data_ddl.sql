@@ -41,10 +41,11 @@ CREATE TABLE Goals
 
 CREATE TABLE Availabilities
 (
-    trainer_id   INT          NOT NULL,
-    day VARCHAR(255) NOT NULL,
-    start_time TIME,
-    end_time TIME,
+    availability_id  SERIAL PRIMARY KEY,
+    trainer_id       INT NOT NULL,
+    day              VARCHAR(255) NOT NULL,
+    start_time       TIME,
+    end_time         TIME,
     FOREIGN KEY (trainer_id)
         REFERENCES Trainers (trainer_id)
 );

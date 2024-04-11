@@ -31,6 +31,10 @@ class Members(models.Model):
         return Members.objects.filter(email=email).first()
     
     @staticmethod
+    def find_member_with_name(first_name, last_name):
+        return Members.objects.filter(first_name=first_name, last_name=last_name).first()
+    
+    @staticmethod
     def find_goals_with_member_id(member_id):
         user = Members.find_member_with_id(member_id)
         if user is not None:
@@ -92,10 +96,43 @@ class Trainers(models.Model):
     @staticmethod
     def login(email, password):
         return Trainers.objects.filter(email=email, password=password).first()
-    
+
     @staticmethod
-    def find_trainer_with_email(email):
-        return Trainers.objects.filter(email=email).first()
+    def find_trainer_with_id(id):
+        return Trainers.objects.filter(trainer_id=id).first()
+        
+    @staticmethod
+    def find_availabilities_with_trainer_id(id):
+        user = Trainers.find_trainer_with_id(id)
+        if user is not None:
+            availabilities = Availabilities.objects.filter(trainer_id=id)
+            return availabilities
+
+    @staticmethod
+    def add_availability(trainer_id, day, start_time, end_time):
+        Availabilities.objects.create(trainer_id=trainer_id, day=day, start_time=start_time, end_time=end_time)
+
+    @staticmethod
+    def edit_availability(availability_id, trainer_id, day, start_time, end_time):
+        if not Availabilities.check_if_availability_belongs_to_trainer(availability_id, trainer_id):
+            return False
+        
+        availability = Availabilities.find_availability_with_id(availability_id)
+        if availability is not None:
+            availability.day = day
+            availability.start_time = start_time
+            availability.end_time = end_time
+            
+            availability.save()
+        else:
+            return False
+        
+    @staticmethod
+    def delete_availability(availability_id, trainer_id):
+        if Availabilities.check_if_availability_belongs_to_trainer(availability_id, trainer_id):
+            availability = Availabilities.find_availability_with_id(availability_id)
+            if availability is not None:
+                availability.delete() 
 
 class AdministrativeStaff(models.Model):
     admin_staff_id = models.AutoField(primary_key=True)
@@ -112,8 +149,8 @@ class AdministrativeStaff(models.Model):
         return AdministrativeStaff.objects.filter(email=email, password=password).first()
     
     @staticmethod
-    def find_admin_staff_with_email(email):
-        return AdministrativeStaff.objects.filter(email=email).first()
+    def find_admin_staff_with_id(id):
+        return AdministrativeStaff.objects.filter(admin_staff_id=id).first()
 
 class Goals(models.Model):
     goal_id = models.AutoField(primary_key=True)
@@ -137,3 +174,26 @@ class Goals(models.Model):
     @staticmethod
     def find_goal_with_id(goal_id):
         return Goals.objects.filter(goal_id=goal_id).first()
+    
+class Availabilities(models.Model):
+    availability_id = models.AutoField(primary_key=True)
+    trainer_id = models.IntegerField(null=False)
+    day = models.CharField(max_length=255, null=False)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'availabilities'
+    
+    @staticmethod
+    def check_if_availability_belongs_to_trainer(availability_id, trainer_id):
+        if Availabilities.objects.filter(availability_id=availability_id, trainer_id=trainer_id).first() is None:
+            return False
+        else:
+            return True
+        
+    @staticmethod
+    def find_availability_with_id(availability_id):
+        return Availabilities.objects.filter(availability_id=availability_id).first()
+    

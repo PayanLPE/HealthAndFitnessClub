@@ -10,15 +10,17 @@
 <body>
     <h1>Dashboard</h1>
     <h2>{{ user.first_name }} {{ user.last_name }}</h2>
-    <h3>MEMBER ID: {{ user.member_id }}</h3>
+    <h3>ID: {{ user.member_id }}</h3>
     <h3>Email: {{ user.email }}</h3>
 
     {% if user_type == 'MEMBER' %}
+    <h3>User Type: MEMBER</h3>
     <h3>HEALTH METRICS: </h3>
     <ul>
         <li>Weight(kgs): {{ user.weight }}kgs</li>
         <li>Height(cms): {{ user.height }}cms</li>
     </ul>
+    <button onclick="location.href='/logout'">logout</button><br><br>
     <h4>Edit my info: </h4>
     <form id="updateForm" method="post" action="update_info">
         {% csrf_token %}
@@ -62,7 +64,7 @@
         </li>
         {% endfor %}
     </ul>
-    <h4>Add a goal: </h4>
+    <h5>Add a goal: </h5>
     <form id="updateForm" method="post" action="add_goal">
         {% csrf_token %}
         <label for="type_of_exercise">Type of exercise:</label>
@@ -75,7 +77,7 @@
         <input type="checkbox" id="reached" name="reached"><br><br>
         <input type="submit" value="Add Goal"><br><br>
     </form>
-    <h4>Edit a goal: </h4>
+    <h5>Edit a goal: </h5>
     <form id="updateForm" method="post" action="edit_goal">
         {% csrf_token %}
         <label for="goal_id">Goal ID:</label>
@@ -90,7 +92,7 @@
         <input type="checkbox" id="reached" name="reached"><br><br>
         <input type="submit" value="Edit Goal"><br><br>
     </form>
-    <h4>Delete a goal: </h4>
+    <h5>Delete a goal: </h5>
     <form id="updateForm" method="post" action="delete_goal">
         {% csrf_token %}
         <label for="goal_id">Goal ID:</label>
@@ -99,6 +101,57 @@
     </form>
 
     {% elif user_type == 'TRAINER' %}
+    <h3>User Type: TRAINER</h3>
+    <h3>Availabilities: </h3>
+    <ul>
+        {% for availability in availabilities %}
+        <li>Availability ID: {{ availability.availability_id }}:
+            <ul>
+                <li>Day:          {{ availability.day }}</li>
+                <li>Start Time:   {{ availability.start_time }}</li>
+                <li>End Time:     {{ availability.end_time }}</li>
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+    <h5>Add an availability: </h5>
+    <form id="updateForm" method="post" action="add_availability">
+        {% csrf_token %}
+        <label for="day">Day:</label>
+        <input type="text" id="day" name="day" required><br><br>
+        <label for="start_time">Start Time:</label>
+        <input type="text" id="start_time" name="start_time" required><br><br>
+        <label for="end_time">End Time:</label>
+        <input type="text" id="end_time" name="end_time" required><br><br>
+        <input type="submit" value="Add Availability"><br><br>
+    </form>
+    <h5>Edit an availability: </h5>
+    <form id="updateForm" method="post" action="edit_availability">
+        {% csrf_token %}
+        <label for="availability_id">Availability ID:</label>
+        <input type="text" id="availability_id" name="availability_id" required><br><br>
+        <label for="day">Day:</label>
+        <input type="text" id="day" name="day" required><br><br>
+        <label for="start_time">Start Time:</label>
+        <input type="text" id="start_time" name="start_time" required><br><br>
+        <label for="end_time">End Time:</label>
+        <input type="text" id="end_time" name="end_time" required><br><br>
+        <input type="submit" value="Edit Availability"><br><br>
+    </form>
+    <h5>Delete an availability: </h5>
+    <form id="updateForm" method="post" action="delete_availability">
+        {% csrf_token %}
+        <label for="availability_id">Availability ID:</label>
+        <input type="text" id="availability_id" name="availability_id" required><br><br>
+        <input type="submit" value="Delete Availability"><br><br>
+    </form>
+
+    <h3>Search Member with name: </h3>
+    <form id="updateForm" method="post" action="search_member">
+        {% csrf_token %}
+        <input type="text" id="member_name" name="member_name" required><br><br>
+        <input type="submit" value="Search"><br><br>
+    </form>
 
     {% elif user_type == 'ADMINSTAFF' %}
 
