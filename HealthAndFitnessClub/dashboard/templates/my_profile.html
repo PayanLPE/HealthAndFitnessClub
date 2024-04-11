@@ -1,0 +1,115 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Dashboard</title>
+</head>
+
+<body>
+    <h1>Dashboard</h1>
+    <h2>{{ user.first_name }} {{ user.last_name }}</h2>
+    <h3>MEMBER ID: {{ user.member_id }}</h3>
+    <h3>Email: {{ user.email }}</h3>
+
+    {% if user_type == 'MEMBER' %}
+    <h3>HEALTH METRICS: </h3>
+    <ul>
+        <li>Weight(kgs): {{ user.weight }}kgs</li>
+        <li>Height(cms): {{ user.height }}cms</li>
+    </ul>
+    <h4>Edit my info: </h4>
+    <form id="updateForm" method="post" action="update_info">
+        {% csrf_token %}
+        <label for="first_name">First Name:</label>
+        <input type="text" id="first_name" name="first_name" placeholder='{{ user.first_name }}'><br><br>
+        <label for="last_name">Last Name:</label>
+        <input type="text" id="last_name" name="last_name" placeholder='{{ user.last_name }}'><br><br>
+        <label for="email">Email:</label>
+        <input type="text" id="email" name="email" placeholder='{{ user.email }}'><br><br>
+        <label for="weight">Weight:</label>
+        <input type="text" id="weight" name="weight" placeholder='{{ user.weight }}'><br><br>
+        <label for="height">Height:</label>
+        <input type="text" id="height" name="height" placeholder='{{ user.height }}'><br><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        <input type="submit" value="Update Changes"><br><br>
+    </form>
+
+    <script>
+        document.getElementById('updateForm').addEventListener('submit', function() {
+            ['first_name', 'last_name', 'email', 'weight', 'height'].forEach(function(id) {
+                var input = document.getElementById(id);
+                if (input.value === '') {
+                    input.value = input.placeholder;
+                }
+            });
+        });
+        </script>
+
+    <h3>GOALS: </h3>
+    <ul>
+        {% for goal in goals %}
+        <li>Goal ID: {{ goal.goal_id }}:
+            <ul>
+                <li>Type of Exercise:      {{ goal.exercise }}</li>
+                <li>Goal Time(seconds):    {{ goal.goal_time }} seconds</li>
+                <li>Goal Weight(lbs):      {{ goal.goal_weight }} kgs</li>
+                <li>Reached:               {{ goal.reached }}</li>
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+    <h4>Add a goal: </h4>
+    <form id="updateForm" method="post" action="add_goal">
+        {% csrf_token %}
+        <label for="type_of_exercise">Type of exercise:</label>
+        <input type="text" id="type_of_exercise" name="type_of_exercise" required><br><br>
+        <label for="goal_time">Goal Time(seconds):</label>
+        <input type="text" id="goal_time" name="goal_time" required><br><br>
+        <label for="goal_weight">Goal Time(kgs):</label>
+        <input type="text" id="goal_weight" name="goal_weight" required><br><br>
+        <label for="reached">Reached:</label>
+        <input type="checkbox" id="reached" name="reached"><br><br>
+        <input type="submit" value="Add Goal"><br><br>
+    </form>
+    <h4>Edit a goal: </h4>
+    <form id="updateForm" method="post" action="edit_goal">
+        {% csrf_token %}
+        <label for="goal_id">Goal ID:</label>
+        <input type="text" id="goal_id" name="goal_id" required><br><br>
+        <label for="type_of_exercise">Type of exercise:</label>
+        <input type="text" id="type_of_exercise" name="type_of_exercise" required><br><br>
+        <label for="goal_time">Goal Time(seconds):</label>
+        <input type="text" id="goal_time" name="goal_time" required><br><br>
+        <label for="goal_weight">Goal Time(kgs):</label>
+        <input type="text" id="goal_weight" name="goal_weight" required><br><br>
+        <label for="reached">Reached:</label>
+        <input type="checkbox" id="reached" name="reached"><br><br>
+        <input type="submit" value="Edit Goal"><br><br>
+    </form>
+    <h4>Delete a goal: </h4>
+    <form id="updateForm" method="post" action="delete_goal">
+        {% csrf_token %}
+        <label for="goal_id">Goal ID:</label>
+        <input type="text" id="goal_id" name="goal_id" required><br><br>
+        <input type="submit" value="Delete Goal"><br><br>
+    </form>
+
+    {% elif user_type == 'TRAINER' %}
+
+    {% elif user_type == 'ADMINSTAFF' %}
+
+    {% endif %}
+
+    {% if msg %}
+    <script>
+        alert("{{ msg }}");
+    </script>
+    {% endif %}
+    
+</body>
+
+</html>

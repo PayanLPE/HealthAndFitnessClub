@@ -1,0 +1,41 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Dashboard</title>
+</head>
+
+<body>
+    <h1>Dashboard</h1>
+    <h2>{{ user.first_name }} {{ user.last_name }}</h2>
+    <h3>MEMBER ID: {{ user.member_id }}</h3>
+    <h3>Email: {{ user.email }}</h3>
+    <h3>HEALTH METRICS: </h3>
+    <ul>
+        <li>Weight(kgs): {{ user.weight }}kgs</li>
+        <li>Height(cms): {{ user.height }}cms</li>
+    </ul>
+
+    <h3>GOALS: </h3>
+    <ul>
+        {% for goal in goals %}
+        <li>Goal ID: {{ goal.goal_id }}:
+            <ul>
+                <li>Type of Exercise:      {{ goal.exercise }}</li>
+                <li>Goal Time(seconds):    {{ goal.goal_time }} seconds</li>
+                <li>Goal Weight(lbs):      {{ goal.goal_weight }} kgs</li>
+                <li>Reached:               {{ goal.reached }}</li>
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+    {% if error %}
+    <script>
+        alert("{{ error }}");
+    </script>
+    {% endif %}
+</body>
+
+</html>

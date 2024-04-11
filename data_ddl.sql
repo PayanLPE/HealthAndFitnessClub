@@ -15,8 +15,7 @@ CREATE TABLE Trainers
     first_name   VARCHAR(255) NOT NULL,
     last_name    VARCHAR(255) NOT NULL,
     email        VARCHAR(255) NOT NULL,
-    password     VARCHAR(255) NOT NULL,
-    Availability VARCHAR(255)
+    password     VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE AdministrativeStaff
@@ -32,6 +31,7 @@ CREATE TABLE Goals
 (
     goal_id     SERIAL PRIMARY KEY,
     member_id   INT NOT NULL,
+    exercise    VARCHAR(255) NOT NULL,
     goal_weight NUMERIC,
     goal_time   NUMERIC,
     reached     BOOLEAN DEFAULT FALSE,
