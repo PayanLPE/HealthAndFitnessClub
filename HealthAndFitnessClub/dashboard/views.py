@@ -1,5 +1,5 @@
 from django.shortcuts import redirect, render
-from .models import Members, Trainers, AdministrativeStaff, Equipments, RoomBookings, FitnessClasses, FitnessClassMembers, TrainingSessions
+from .models import Members, Trainers, AdministrativeStaff, Equipments, RoomBookings, FitnessClasses, FitnessClassMembers, TrainingSessions, Payments
 
 # Create your views here.
 
@@ -82,9 +82,10 @@ def my_profile(request):
             goals = Members.find_goals_with_member_id(id)
             classes = FitnessClassMembers.get_classes_with_member_id(id)
             sessions = TrainingSessions.get_sessions_by_member_id(id)
+            payments = Payments.find_payments_member_id(id)
 
             if user:
-                return render(request, 'my_profile.html', {'user': user, 'user_type': 'MEMBER', 'goals': goals, 'classes': classes, 'sessions': sessions})
+                return render(request, 'my_profile.html', {'user': user, 'user_type': 'MEMBER', 'goals': goals, 'classes': classes, 'sessions': sessions, 'payments': payments})
         if request.COOKIES['user_type'] == 'TRAINER':
             user = Trainers.find_trainer_with_id(id)
             availabilities = Trainers.find_availabilities_with_trainer_id(id)
@@ -95,8 +96,9 @@ def my_profile(request):
             user = AdministrativeStaff.find_admin_staff_with_id(id)
             equipments = Equipments.find_all_equipments()
             bookings = RoomBookings.find_all_bookings()
+            payments = Payments.find_all_payments()
             if user:
-                return render(request, 'my_profile.html', {'user': user, 'user_type': 'ADMINSTAFF', 'equipments': equipments, 'bookings': bookings})
+                return render(request, 'my_profile.html', {'user': user, 'user_type': 'ADMINSTAFF', 'equipments': equipments, 'bookings': bookings, 'payments': payments})
     else:
         return redirect('/login/')
 
@@ -245,11 +247,12 @@ def delete_equipment(request):
 def add_booking(request):
     if request.method == 'POST':
         room_number = request.POST.get('room_number')
+        date = request.POST.get('date')
         booking_start_time = request.POST.get('booking_start_time')
         booking_end_time = request.POST.get('booking_end_time')
 
         RoomBookings.add_booking(
-            int(request.COOKIES['id']), room_number, booking_start_time, booking_end_time)
+            int(request.COOKIES['id']), room_number, date, booking_start_time, booking_end_time)
         return redirect('/my_profile/')
     else:
         return redirect('/my_profile/')
@@ -259,11 +262,12 @@ def edit_booking(request):
     if request.method == 'POST':
         booking_id = request.POST.get('booking_id')
         room_number = request.POST.get('room_number')
+        date = request.POST.get('date')
         booking_start_time = request.POST.get('booking_start_time')
         booking_end_time = request.POST.get('booking_end_time')
 
         RoomBookings.edit_booking(booking_id, int(
-            request.COOKIES['id']), room_number, booking_start_time, booking_end_time)
+            request.COOKIES['id']), room_number, date, booking_start_time, booking_end_time)
         return redirect('/my_profile/')
     else:
         return redirect('/my_profile/')
@@ -387,3 +391,16 @@ def delete_session(request):
         return redirect('/my_profile/')
     else:
         return redirect('/my_profile/')
+
+def pay_bill(request):
+    if request.method == 'POST':
+        amount = request.POST.get('amount')
+        Payments.create_payment(int(request.COOKIES['id']), amount)
+
+        return redirect('/my_profile/')
+    else:
+        return redirect('/my_profile/')
+    
+def authorize_payment(request, id):
+    Payments.authorize_payment(id)
+    return redirect('/my_profile/')

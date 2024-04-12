@@ -6,7 +6,8 @@ CREATE TABLE Members
     email      VARCHAR(255) NOT NULL,
     password   VARCHAR(255) NOT NULL,
     weight     NUMERIC,
-    height     NUMERIC
+    height     NUMERIC,
+    account_balance NUMERIC DEFAULT 0
 );
 
 CREATE TABLE Trainers
@@ -93,6 +94,7 @@ CREATE TABLE RoomBookings
 (
     booking_id     SERIAL PRIMARY KEY,
     room_number    INT NOT NULL,
+    date DATE NOT NULL,
     booking_start_time   TIME,
     booking_end_time   TIME,
     admin_staff_id INT NOT NULL,

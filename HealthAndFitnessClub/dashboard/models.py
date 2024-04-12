@@ -10,10 +10,18 @@ class Members(models.Model):
     password = models.CharField(max_length=255, null=False)
     weight = models.DecimalField(max_digits=5, decimal_places=2, null=True)
     height = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    account_balance = models.DecimalField(max_digits=5, decimal_places=2, null=True, default=0)
 
     class Meta:
         managed = False
         db_table = 'members'
+
+    @staticmethod
+    def add_amount_to_member(member_id, amount):
+        user = Members.objects.filter(member_id=member_id).first()
+        user.account_balance += amount
+
+        user.save()
 
     @staticmethod
     def login(email, password):
@@ -223,7 +231,7 @@ class Equipments(models.Model):
         equipment.equipment_name = equipment_name
         equipment.last_maintenance = last_maintenance
         equipment.next_maintenance = next_maintenance
-        equipment.next_maintenance = admin_staff_id
+        equipment.admin_staff_id = admin_staff_id
 
         equipment.save()
     
@@ -234,6 +242,7 @@ class Equipments(models.Model):
 class RoomBookings(models.Model):
     booking_id = models.AutoField(primary_key=True)
     room_number = models.IntegerField()
+    date = models.DateField()
     booking_start_time = models.TimeField()
     booking_end_time = models.TimeField()
     admin_staff_id = models.IntegerField(null=False)
@@ -247,13 +256,14 @@ class RoomBookings(models.Model):
         return RoomBookings.objects.filter()
     
     @staticmethod
-    def add_booking(admin_staff_id, room_number, booking_start_time, booking_end_time):
-        RoomBookings.objects.create(room_number=room_number, admin_staff_id=admin_staff_id, booking_start_time=booking_start_time, booking_end_time=booking_end_time)
+    def add_booking(admin_staff_id, room_number, date, booking_start_time, booking_end_time):
+        RoomBookings.objects.create(room_number=room_number, date=date, admin_staff_id=admin_staff_id, booking_start_time=booking_start_time, booking_end_time=booking_end_time)
     
     @staticmethod
-    def edit_booking(booking_id, admin_staff_id, room_number, booking_start_time, booking_end_time):
+    def edit_booking(booking_id, admin_staff_id, room_number, date, booking_start_time, booking_end_time):
         booking = RoomBookings.objects.filter(booking_id=booking_id).first()
         booking.room_number = room_number
+        booking.date = date
         booking.booking_start_time = booking_start_time
         booking.booking_end_time = booking_end_time
         booking.admin_staff_id = admin_staff_id
@@ -345,11 +355,13 @@ class FitnessClassMembers(models.Model):
     def add_members_to_class(member_id, class_id):
         if (FitnessClassMembers.objects.filter(member_id=member_id, class_id=class_id).first() is None):
             FitnessClassMembers.objects.create(member_id=member_id, class_id=class_id)
+            Members.add_amount_to_member(member_id, 50)
     
     @staticmethod
     def remove_members_to_class(member_id, class_id):
         if (FitnessClassMembers.objects.filter(member_id=member_id, class_id=class_id).first() is not None):
             FitnessClassMembers.objects.filter(member_id=member_id, class_id=class_id).first().delete()
+            Members.add_amount_to_member(member_id, -50)
 
     @staticmethod
     def get_classes_with_member_id(member_id):
@@ -398,7 +410,8 @@ class TrainingSessions(models.Model):
                 check = True
         if check:
             TrainingSessions.objects.create(member_id=member_id, trainer_id=trainer_id, day=day, session_start_time=session_start_time, session_end_time=session_end_time)
-    
+            Members.add_amount_to_member(member_id, 100)
+
     @staticmethod
     def edit_session(session_id, member_id, trainer_id, day, session_start_time, session_end_time):
         availabilities = Availabilities.objects.filter(trainer_id=trainer_id, day=day)
@@ -418,4 +431,40 @@ class TrainingSessions(models.Model):
     
     @staticmethod
     def delete_session(session_id):
-        TrainingSessions.objects.filter(session_id=session_id).first().delete() 
+        session = TrainingSessions.objects.filter(session_id=session_id).first()
+        Members.add_amount_to_member(session.member_id, 100)
+        session.delete()
+
+class Payments(models.Model):
+    payment_id = models.AutoField(primary_key=True)
+    member_id = models.IntegerField()
+    amount = models.DecimalField(max_digits=5, decimal_places=2, null=True)
+    payment_date = models.DateField()
+    posted = models.BooleanField()
+
+    class Meta:
+        managed = False
+        db_table = 'payments'
+
+    @staticmethod
+    def find_all_payments():
+        return Payments.objects.filter()
+    
+    @staticmethod
+    def find_payments_member_id(member_id):
+        return Payments.objects.filter(member_id=member_id)
+
+    @staticmethod
+    def create_payment(member_id, amount):
+        Payments.objects.create(member_id=member_id, amount=amount, payment_date=datetime.date.today(), posted=False)
+
+    @staticmethod
+    def authorize_payment(payment_id):
+        payment = Payments.objects.filter(payment_id=payment_id).first()
+        payment.posted = True
+        
+        # change the member balance after authorize
+
+        Members.add_amount_to_member(payment.member_id, 0 - payment.amount)
+
+        payment.save()

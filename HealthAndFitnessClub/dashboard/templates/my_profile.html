@@ -62,7 +62,7 @@
             <ul>
                 <li>Type of Exercise: {{ goal.exercise }}</li>
                 <li>Goal Time(minutes): {{ goal.goal_time }} minutes</li>
-                <li>Goal Weight(lbs): {{ goal.goal_weight }} kgs</li>
+                <li>Goal Weight(lbs): {{ goal.goal_weight }} lbs</li>
                 <li>Reached: {{ goal.reached }}</li>
             </ul>
         </li>
@@ -75,7 +75,7 @@
         <input type="text" id="type_of_exercise" name="type_of_exercise" required><br><br>
         <label for="goal_time">Goal Time(seconds):</label>
         <input type="text" id="goal_time" name="goal_time" required><br><br>
-        <label for="goal_weight">Goal Time(kgs):</label>
+        <label for="goal_weight">Goal Weight(lbs):</label>
         <input type="text" id="goal_weight" name="goal_weight" required><br><br>
         <label for="reached">Reached:</label>
         <input type="checkbox" id="reached" name="reached"><br><br>
@@ -90,7 +90,7 @@
         <input type="text" id="type_of_exercise" name="type_of_exercise" required><br><br>
         <label for="goal_time">Goal Time(seconds):</label>
         <input type="text" id="goal_time" name="goal_time" required><br><br>
-        <label for="goal_weight">Goal Time(kgs):</label>
+        <label for="goal_weight">Goal Weight(lbs):</label>
         <input type="text" id="goal_weight" name="goal_weight" required><br><br>
         <label for="reached">Reached:</label>
         <input type="checkbox" id="reached" name="reached"><br><br>
@@ -175,6 +175,26 @@
         <label for="session_id">Session ID:</label>
         <input type="text" id="session_id" name="session_id" required><br><br>
         <input type="submit" value="Delete session"><br><br>
+    </form>
+    
+    <!-- Account Balance -->
+    <h3>My Balance: $ {{ user.account_balance }}</h3>
+    <h3>My Payment: </h3>
+    {% for payment in payments %}
+    <li>Payment ID: {{ payment.payment_id }}:
+        <ul>
+            <li>Amount: {{ payment.amount }}</li>
+            <li>Payment Date: {{ payment.payment_date }}</li>
+            <li>Posted: {{ payment.posted }}</li>
+        </ul>
+    </li>
+    {% endfor %}
+    <h4>Make a Payment</h4>
+    <form id="updateForm" method="post" action="pay_bill">
+        {% csrf_token %}
+        <label for="amount">Amount:</label>
+        <input type="text" id="amount" name="amount" required><br><br>
+        <input type="submit" value="Pay Bill"><br><br>
     </form>
     
 
@@ -291,8 +311,9 @@
         {% for booking in bookings %}
         <li>Room Booking ID: {{ booking.booking_id }}:
             <ul>
-                <li>Room Owner: {{ booking.admin_staff_id }}</li>
+                <li>Room Owner Admin ID: {{ booking.admin_staff_id }}</li>
                 <li>Room Number: {{ booking.room_number }}</li>
+                <li>Date: {{ booking.date }}</li>
                 <li>Start Time: {{ booking.booking_start_time }}</li>
                 <li>End Time: {{ booking.booking_end_time }}</li>
             </ul>
@@ -304,6 +325,8 @@
         {% csrf_token %}
         <label for="room_number">Room Number</label>
         <input type="text" id="room_number" name="room_number" required><br><br>
+        <label for="date">Date</label>
+        <input type="text" id="date" name="date" required><br><br>
         <label for="booking_start_time">Start Time:</label>
         <input type="text" id="booking_start_time" name="booking_start_time" required><br><br>
         <label for="booking_end_time">End Time:</label>
@@ -317,6 +340,8 @@
         <input type="text" id="booking_id" name="booking_id" required><br><br>
         <label for="room_number">Room Number</label>
         <input type="text" id="room_number" name="room_number" required><br><br>
+        <label for="date">Date</label>
+        <input type="text" id="date" name="date" required><br><br>
         <label for="booking_start_time">Start Time:</label>
         <input type="text" id="booking_start_time" name="booking_start_time" required><br><br>
         <label for="booking_end_time">End Time:</label>
@@ -333,6 +358,23 @@
 
     <button onclick="location.href='/fitness_classes/'">Edit Fitness Classes</button><br><br>
 
+    <!-- Payments -->
+    <h3>Payments</h3>
+    <ul>
+        {% for payment in payments %}
+        <li>Payment ID: {{ payment.payment_id }}:
+            <ul>
+                <li>Member Id: {{ payment.member_id }}</li>
+                <li>Amount: {{ payment.amount }}</li>
+                <li>Payment Date: {{ payment.payment_date }}</li>
+                <li>Posted: {{ payment.posted }}</li>
+                {% if payment.posted == False %}
+                <button onclick="location.href='authorize_payment/{{ payment.payment_id }}'">AUTHORIZE</button><br><br>
+                {% endif %}
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
     {% endif %}
 
     {% if msg %}
