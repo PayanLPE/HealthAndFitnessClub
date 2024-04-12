@@ -432,7 +432,7 @@ class TrainingSessions(models.Model):
     @staticmethod
     def delete_session(session_id):
         session = TrainingSessions.objects.filter(session_id=session_id).first()
-        Members.add_amount_to_member(session.member_id, 100)
+        Members.add_amount_to_member(session.member_id, -100)
         session.delete()
 
 class Payments(models.Model):
