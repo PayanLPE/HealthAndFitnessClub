@@ -1,0 +1,74 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Group Fitness Classes</title>
+</head>
+
+<body>
+    <h1>Group Fitness Classes</h1>
+    {% for class in classes %}
+    <li>Class ID: {{ class.class_id }}:
+        <ul>
+            <li>Trainer ID: {{ class.trainer_id }}</li>
+            <li>Trainer: {{ class.trainer_name }}</li>
+            <li>Day: {{ class.day }}</li>
+            <li>Class Start Time: {{ class.class_start_time }}</li>
+            <li>Class End Time: {{ class.class_end_time }}</li>
+            <li>Participants: </li>
+            <ul>
+                {% for member in class.members %}
+                <li>{{ member }}</li>
+                {% endfor %}
+            </ul>
+        </ul>
+    </li>
+    {% if user_type == 'MEMBER' %}
+    <button onclick="location.href='/fitness_classes/join_class/{{ class.class_id }}'">JOIN CLASS</button><br><br>
+    <button onclick="location.href='/fitness_classes/leave_class/{{ class.class_id }}'">LEAVE CLASS</button><br><br>
+    {% endif %}
+    {% endfor %}
+
+    {% if user_type == 'ADMINSTAFF' %}
+	<h5>Add an Fitness Class: </h5>
+    <form id="updateForm" method="post" action="add_class">
+        {% csrf_token %}
+        <label for="trainer_id">Trainer ID</label>
+        <input type="text" id="trainer_id" name="trainer_id" required><br><br>
+        <label for="day">Day:</label>
+        <input type="text" id="day" name="day" required><br><br>
+        <label for="class_start_time">Class Start Time:</label>
+        <input type="text" id="class_start_time" name="class_start_time" required><br><br>
+		<label for="class_end_time">Class End Time:</label>
+        <input type="text" id="class_end_time" name="class_end_time" required><br><br>
+        <input type="submit" value="Add Class"><br><br>
+    </form>
+    <h5>Edit an Fitness Class: </h5>
+    <form id="updateForm" method="post" action="edit_class">
+        {% csrf_token %}
+        <label for="class_id">Class ID:</label>
+        <input type="text" id="class_id" name="class_id" required><br><br>
+        <label for="trainer_id">Trainer ID</label>
+        <input type="text" id="trainer_id" name="trainer_id" required><br><br>
+        <label for="day">Day:</label>
+        <input type="text" id="day" name="day" required><br><br>
+        <label for="class_start_time">Class Start Time:</label>
+        <input type="text" id="class_start_time" name="class_start_time" required><br><br>
+		<label for="class_end_time">Class End Time:</label>
+        <input type="text" id="class_end_time" name="class_end_time" required><br><br>
+        <input type="submit" value="Edit Class"><br><br>
+    </form>
+    <h5>Delete an Fitness Class: </h5>
+    <form id="updateForm" method="post" action="delete_class">
+        {% csrf_token %}
+        <label for="class_id">Class ID:</label>
+        <input type="text" id="class_id" name="class_id" required><br><br>
+        <input type="submit" value="Delete Class"><br><br>
+    </form>
+    {% endif %}
+    <button onclick="location.href='/my_profile/'">Go back to my profile</button><br><br>
+</body>
+
+</html>

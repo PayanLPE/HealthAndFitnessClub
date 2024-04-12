@@ -10,10 +10,11 @@
 <body>
     <h1>Dashboard</h1>
     <h2>{{ user.first_name }} {{ user.last_name }}</h2>
-    <h3>ID: {{ user.member_id }}</h3>
+    <h3>ID: {{ user.member_id }}{{ user.trainer_id }}{{ user.admin_staff_id }}</h3>
     <h3>Email: {{ user.email }}</h3>
 
     {% if user_type == 'MEMBER' %}
+    <!-- Member -->
     <h3>User Type: MEMBER</h3>
     <h3>HEALTH METRICS: </h3>
     <ul>
@@ -21,7 +22,9 @@
         <li>Height(cms): {{ user.height }}cms</li>
     </ul>
     <button onclick="location.href='/logout'">logout</button><br><br>
-    <h4>Edit my info: </h4>
+
+    <!-- Personal Info  -->
+    <h3>Edit my info: </h3>
     <form id="updateForm" method="post" action="update_info">
         {% csrf_token %}
         <label for="first_name">First Name:</label>
@@ -41,25 +44,26 @@
     </form>
 
     <script>
-        document.getElementById('updateForm').addEventListener('submit', function() {
-            ['first_name', 'last_name', 'email', 'weight', 'height'].forEach(function(id) {
+        document.getElementById('updateForm').addEventListener('submit', function () {
+            ['first_name', 'last_name', 'email', 'weight', 'height'].forEach(function (id) {
                 var input = document.getElementById(id);
                 if (input.value === '') {
                     input.value = input.placeholder;
                 }
             });
         });
-        </script>
+    </script>
 
+    <!-- Goals -->
     <h3>GOALS: </h3>
     <ul>
         {% for goal in goals %}
         <li>Goal ID: {{ goal.goal_id }}:
             <ul>
-                <li>Type of Exercise:      {{ goal.exercise }}</li>
-                <li>Goal Time(seconds):    {{ goal.goal_time }} seconds</li>
-                <li>Goal Weight(lbs):      {{ goal.goal_weight }} kgs</li>
-                <li>Reached:               {{ goal.reached }}</li>
+                <li>Type of Exercise: {{ goal.exercise }}</li>
+                <li>Goal Time(minutes): {{ goal.goal_time }} minutes</li>
+                <li>Goal Weight(lbs): {{ goal.goal_weight }} kgs</li>
+                <li>Reached: {{ goal.reached }}</li>
             </ul>
         </li>
         {% endfor %}
@@ -100,20 +104,40 @@
         <input type="submit" value="Delete Goal"><br><br>
     </form>
 
+    <!-- Fitness Classes -->
+    <h3>My Fitness Classes: </h3>
+    <ul>
+        {% for class in classes %}
+        <li>Class ID: {{ class.class_id }}
+            <ul>
+                <li>Trainer : {{ class.trainer_name }}</li>
+                <li>Day: {{ class.day }}</li>
+                <li>Class Start Time: {{ class.class_start_time }}</li>
+                <li>Class End Time: {{ class.class_end_time }}</li>
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+    <button onclick="location.href='/fitness_classes/'">Edit Fitness Classes</button><br><br>
+
     {% elif user_type == 'TRAINER' %}
+    <!-- Trainer -->
+    <button onclick="location.href='/logout'">logout</button><br><br>
     <h3>User Type: TRAINER</h3>
     <h3>Availabilities: </h3>
     <ul>
         {% for availability in availabilities %}
         <li>Availability ID: {{ availability.availability_id }}:
             <ul>
-                <li>Day:          {{ availability.day }}</li>
-                <li>Start Time:   {{ availability.start_time }}</li>
-                <li>End Time:     {{ availability.end_time }}</li>
+                <li>Day: {{ availability.day }}</li>
+                <li>Start Time: {{ availability.start_time }}</li>
+                <li>End Time: {{ availability.end_time }}</li>
             </ul>
         </li>
         {% endfor %}
     </ul>
+
+    <!-- Availibity -->
     <h5>Add an availability: </h5>
     <form id="updateForm" method="post" action="add_availability">
         {% csrf_token %}
@@ -154,6 +178,102 @@
     </form>
 
     {% elif user_type == 'ADMINSTAFF' %}
+    <!-- Admin Staff -->
+    <button onclick="location.href='/logout'">logout</button><br><br>
+    <h3>User Type: ADMINSTAFF</h3>
+
+    <!-- Equipment -->
+    <h3>Equipment Maintaince: </h3>
+    <ul>
+        {% for equipment in equipments %}
+        <li>Equipment ID: {{ equipment.equipment_id }}:
+            <ul>
+                <li>Equipment Name: {{ equipment.equipment_name }}</li>
+                <li>Last Maintenance Date: {{ equipment.last_maintenance }}</li>
+                <li>Next Maintenance Date: {{ equipment.next_maintenance }}</li>
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+    <h5>Add an Equipment Maintaince: </h5>
+    <form id="updateForm" method="post" action="add_equipment">
+        {% csrf_token %}
+        <label for="equipment_name">Equipment Name:</label>
+        <input type="text" id="equipment_name" name="equipment_name" required><br><br>
+        <label for="last_maintenance">Last Maintenance Date:</label>
+        <input type="text" id="last_maintenance" name="last_maintenance" required><br><br>
+        <label for="next_maintenance">Next Maintenance Date:</label>
+        <input type="text" id="next_maintenance" name="next_maintenance" required><br><br>
+        <input type="submit" value="Add Equipment"><br><br>
+    </form>
+    <h5>Edit an Equipment Maintaince: </h5>
+    <form id="updateForm" method="post" action="edit_equipment">
+        {% csrf_token %}
+        <label for="equipment_id">Equipment ID:</label>
+        <input type="text" id="equipment_id" name="equipment_id" required><br><br>
+        <label for="equipment_name">Equipment Name:</label>
+        <input type="text" id="equipment_name" name="equipment_name" required><br><br>
+        <label for="last_maintenance">Last Maintenance:</label>
+        <input type="text" id="last_maintenance" name="last_maintenance" required><br><br>
+        <label for="next_maintenance">Next Maintenance:</label>
+        <input type="text" id="next_maintenance" name="next_maintenance" required><br><br>
+        <input type="submit" value="Edit Equipment"><br><br>
+    </form>
+    <h5>Delete an Equipment Maintaince: </h5>
+    <form id="updateForm" method="post" action="delete_equipment">
+        {% csrf_token %}
+        <label for="equipment_id">Equipment ID:</label>
+        <input type="text" id="equipment_id" name="equipment_id" required><br><br>
+        <input type="submit" value="Delete Equipment"><br><br>
+    </form>
+
+    <!-- Room Booking -->
+    <h3>Room Booking: </h3>
+    <ul>
+        {% for booking in bookings %}
+        <li>Room Booking ID: {{ booking.booking_id }}:
+            <ul>
+                <li>Room Owner: {{ booking.admin_staff_id }}</li>
+                <li>Room Number: {{ booking.room_number }}</li>
+                <li>Start Time: {{ booking.booking_start_time }}</li>
+                <li>End Time: {{ booking.booking_end_time }}</li>
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+    <h5>Add an Room Booking: </h5>
+    <form id="updateForm" method="post" action="add_booking">
+        {% csrf_token %}
+        <label for="room_number">Room Number</label>
+        <input type="text" id="room_number" name="room_number" required><br><br>
+        <label for="booking_start_time">Start Time:</label>
+        <input type="text" id="booking_start_time" name="booking_start_time" required><br><br>
+        <label for="booking_end_time">End Time:</label>
+        <input type="text" id="booking_end_time" name="booking_end_time" required><br><br>
+        <input type="submit" value="Add Booking"><br><br>
+    </form>
+    <h5>Edit an Room Booking: </h5>
+    <form id="updateForm" method="post" action="edit_booking">
+        {% csrf_token %}
+        <label for="booking_id">Booking ID:</label>
+        <input type="text" id="booking_id" name="booking_id" required><br><br>
+        <label for="room_number">Room Number</label>
+        <input type="text" id="room_number" name="room_number" required><br><br>
+        <label for="booking_start_time">Start Time:</label>
+        <input type="text" id="booking_start_time" name="booking_start_time" required><br><br>
+        <label for="booking_end_time">End Time:</label>
+        <input type="text" id="booking_end_time" name="booking_end_time" required><br><br>
+        <input type="submit" value="Edit Booking"><br><br>
+    </form>
+    <h5>Delete an Room Booking: </h5>
+    <form id="updateForm" method="post" action="delete_booking">
+        {% csrf_token %}
+        <label for="booking_id">Booking ID:</label>
+        <input type="text" id="booking_id" name="booking_id" required><br><br>
+        <input type="submit" value="Delete Booking"><br><br>
+    </form>
+
+    <button onclick="location.href='/fitness_classes/'">Edit Fitness Classes</button><br><br>
 
     {% endif %}
 
@@ -162,7 +282,7 @@
         alert("{{ msg }}");
     </script>
     {% endif %}
-    
+
 </body>
 
 </html>

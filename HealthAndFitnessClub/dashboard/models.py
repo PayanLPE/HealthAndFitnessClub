@@ -197,3 +197,151 @@ class Availabilities(models.Model):
     def find_availability_with_id(availability_id):
         return Availabilities.objects.filter(availability_id=availability_id).first()
     
+class Equipments(models.Model):
+    equipment_id = models.AutoField(primary_key=True)
+    equipment_name = models.CharField(max_length=255, null=False)
+    last_maintenance = models.DateField()
+    next_maintenance = models.DateField()
+
+    class Meta:
+        managed = False
+        db_table = 'equipments'
+
+    @staticmethod
+    def find_all_equipments():
+        return Equipments.objects.filter()
+    
+    @staticmethod
+    def add_equipment(equipment_name, last_maintenance, next_maintenance):
+        Equipments.objects.create(equipment_name=equipment_name, last_maintenance=last_maintenance, next_maintenance=next_maintenance)
+    
+    @staticmethod
+    def edit_equipment(equipment_id, equipment_name, last_maintenance, next_maintenance):
+        equipment = Equipments.objects.filter(equipment_id=equipment_id).first()
+        equipment.equipment_name = equipment_name
+        equipment.last_maintenance = last_maintenance
+        equipment.next_maintenance = next_maintenance
+
+        equipment.save()
+    
+    @staticmethod
+    def delete_equipment(equipment_id):
+        Equipments.objects.filter(equipment_id=equipment_id).first().delete() 
+    
+class RoomBookings(models.Model):
+    booking_id = models.AutoField(primary_key=True)
+    room_number = models.IntegerField()
+    booking_start_time = models.TimeField()
+    booking_end_time = models.TimeField()
+    admin_staff_id = models.IntegerField(null=False)
+
+    class Meta:
+        managed = False
+        db_table = 'roombookings'
+
+    @staticmethod
+    def find_all_bookings():
+        return RoomBookings.objects.filter()
+    
+    @staticmethod
+    def add_booking(admin_staff_id, room_number, booking_start_time, booking_end_time):
+        RoomBookings.objects.create(room_number=room_number, admin_staff_id=admin_staff_id, booking_start_time=booking_start_time, booking_end_time=booking_end_time)
+    
+    @staticmethod
+    def edit_booking(booking_id, admin_staff_id, room_number, booking_start_time, booking_end_time):
+        booking = RoomBookings.objects.filter(booking_id=booking_id).first()
+        booking.room_number = room_number
+        booking.booking_start_time = booking_start_time
+        booking.booking_end_time = booking_end_time
+        booking.admin_staff_id = admin_staff_id
+         
+        booking.save()
+    
+    @staticmethod
+    def delete_booking(booking_id):
+        RoomBookings.objects.filter(booking_id=booking_id).first().delete() 
+
+class FitnessClasses(models.Model):
+    class_id = models.AutoField(primary_key=True)
+    trainer_id = models.IntegerField()
+    day = models.CharField(max_length=255, null=False)
+    class_start_time = models.TimeField()
+    class_end_time = models.TimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'fitnessclasses'
+
+    @staticmethod
+    def get_all_classes():
+        classes = FitnessClasses.objects.filter()
+        for c in classes:
+            c.trainer_name = Trainers.find_trainer_with_id(c.trainer_id).first_name + ' '+ Trainers.find_trainer_with_id(c.trainer_id).last_name
+
+            participants = FitnessClassMembers.get_all_members(c.class_id)
+            names = []
+            for p in participants:
+                names.append(Members.find_member_with_id(p.member_id).first_name + ' '+ Members.find_member_with_id(p.member_id).last_name)
+            c.members = names
+        return classes
+    
+    @staticmethod
+    def get_class_with_id(class_id):
+        return FitnessClasses.objects.filter(class_id=class_id)
+    
+    @staticmethod
+    def add_class(trainer_id, day, class_start_time, class_end_time):
+        FitnessClasses.objects.create(trainer_id=trainer_id, day=day, class_start_time=class_start_time, class_end_time=class_end_time)
+    
+    @staticmethod
+    def edit_class(class_id, trainer_id, day, class_start_time, class_end_time):
+        c = FitnessClasses.objects.filter(class_id=class_id).first()
+        c.trainer_id = trainer_id
+        c.day = day
+        c.class_start_time = class_start_time
+        c.class_end_time = class_end_time
+         
+        c.save()
+    
+    @staticmethod
+    def delete_class(class_id):
+        members = FitnessClassMembers.objects.filter(class_id=class_id)
+        for m in members:
+            m.delete()
+        FitnessClasses.objects.filter(class_id=class_id).first().delete() 
+    
+class FitnessClassMembers(models.Model):
+    id = models.AutoField(primary_key=True)
+    class_id = models.IntegerField(null=False)
+    member_id = models.IntegerField(null=False)
+
+    class Meta:
+        managed = False
+        db_table = 'fitnessclassmembers'
+
+    @staticmethod
+    def get_all_members(class_id):
+        return FitnessClassMembers.objects.filter(class_id=class_id)
+    
+    @staticmethod
+    def add_members_to_class(member_id, class_id):
+        if (FitnessClassMembers.objects.filter(member_id=member_id, class_id=class_id).first() is None):
+            FitnessClassMembers.objects.create(member_id=member_id, class_id=class_id)
+    
+    @staticmethod
+    def remove_members_to_class(member_id, class_id):
+        if (FitnessClassMembers.objects.filter(member_id=member_id, class_id=class_id).first() is not None):
+            FitnessClassMembers.objects.filter(member_id=member_id, class_id=class_id).first().delete()
+
+    @staticmethod
+    def get_classes_with_member_id(member_id):
+        ids = FitnessClassMembers.objects.filter(member_id=member_id)
+
+        classes = []
+        for id in ids:
+            c = FitnessClasses.get_class_with_id(id.class_id).first()
+            c.trainer_name = Trainers.find_trainer_with_id(c.trainer_id).first_name + " " + Trainers.find_trainer_with_id(c.trainer_id).last_name
+            classes.append(c)
+
+        return classes
+            
