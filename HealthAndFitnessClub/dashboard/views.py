@@ -1,5 +1,5 @@
 from django.shortcuts import redirect, render
-from .models import Members, Trainers, AdministrativeStaff, Equipments, RoomBookings, FitnessClasses, FitnessClassMembers
+from .models import Members, Trainers, AdministrativeStaff, Equipments, RoomBookings, FitnessClasses, FitnessClassMembers, TrainingSessions
 
 # Create your views here.
 
@@ -35,6 +35,7 @@ def sign_in(request):
     else:
         return render(request, 'login.html')
 
+
 def register(request):
     if request.method == 'POST':
         first_name = request.POST['first_name']
@@ -51,6 +52,7 @@ def register(request):
     else:
         return render(request, 'register.html')
 
+
 def sign_out(request):
     response = redirect('/login')
     response.delete_cookie('email')
@@ -58,13 +60,18 @@ def sign_out(request):
     response.delete_cookie('user_type')
     return response
 
+
 def member_dashboard(request, id):
     member = Members.find_member_with_id(id)
     goals = Members.find_goals_with_member_id(id)
+    classes = FitnessClassMembers.get_classes_with_member_id(id)
+    sessions = TrainingSessions.get_sessions_by_member_id(id)
+
     if not member == None:
-        return render(request, 'member_profile.html', {'user_type': 'member', 'user': member, 'goals': goals})
+        return render(request, 'member_profile.html', {'user_type': 'member', 'user': member, 'goals': goals, 'classes': classes, 'sessions': sessions})
     else:
         return render(request, 'member_profile.html', {'msg': 'User not found'})
+
 
 def my_profile(request):
     if 'email' in request.COOKIES:
@@ -74,9 +81,10 @@ def my_profile(request):
             user = Members.find_member_with_id(id)
             goals = Members.find_goals_with_member_id(id)
             classes = FitnessClassMembers.get_classes_with_member_id(id)
+            sessions = TrainingSessions.get_sessions_by_member_id(id)
 
             if user:
-                return render(request, 'my_profile.html', {'user': user, 'user_type': 'MEMBER', 'goals': goals, 'classes': classes})
+                return render(request, 'my_profile.html', {'user': user, 'user_type': 'MEMBER', 'goals': goals, 'classes': classes, 'sessions': sessions})
         if request.COOKIES['user_type'] == 'TRAINER':
             user = Trainers.find_trainer_with_id(id)
             availabilities = Trainers.find_availabilities_with_trainer_id(id)
@@ -92,6 +100,7 @@ def my_profile(request):
     else:
         return redirect('/login/')
 
+
 def update_info(request):
     if request.method == 'POST':
         first_name = request.POST.get('first_name')
@@ -101,10 +110,12 @@ def update_info(request):
         height = request.POST.get('height')
         password = request.POST.get('password')
 
-        Members.update_info(int(request.COOKIES['id']), first_name, last_name, email, password, weight, height)
+        Members.update_info(int(
+            request.COOKIES['id']), first_name, last_name, email, password, weight, height)
         return redirect('/my_profile/')
     else:
         return redirect('/my_profile/')
+
 
 def add_goal(request):
     if request.method == 'POST':
@@ -113,11 +124,13 @@ def add_goal(request):
         goal_weight = request.POST.get('goal_weight')
         reached = request.POST.get('reached') is not None
 
-        Members.add_goal(int(request.COOKIES['id']), type_of_exercise, goal_time, goal_weight, reached)
+        Members.add_goal(
+            int(request.COOKIES['id']), type_of_exercise, goal_time, goal_weight, reached)
         return redirect('/my_profile/')
     else:
         return redirect('/my_profile/')
-    
+
+
 def edit_goal(request):
     if request.method == 'POST':
         goal_id = request.POST.get('goal_id')
@@ -126,11 +139,13 @@ def edit_goal(request):
         goal_weight = request.POST.get('goal_weight')
         reached = request.POST.get('reached') is not None
 
-        Members.edit_goal(goal_id, int(request.COOKIES['id']), type_of_exercise, goal_time, goal_weight, reached)
+        Members.edit_goal(goal_id, int(
+            request.COOKIES['id']), type_of_exercise, goal_time, goal_weight, reached)
         return redirect('/my_profile/')
     else:
         return redirect('/my_profile/')
-    
+
+
 def delete_goal(request):
     if request.method == 'POST':
         goal_id = request.POST.get('goal_id')
@@ -139,18 +154,21 @@ def delete_goal(request):
         return redirect('/my_profile/')
     else:
         return redirect('/my_profile/')
-    
+
+
 def add_availability(request):
     if request.method == 'POST':
         day = request.POST.get('day')
         start_time = request.POST.get('start_time')
         end_time = request.POST.get('end_time')
 
-        Trainers.add_availability(int(request.COOKIES['id']), day, start_time, end_time)
+        Trainers.add_availability(
+            int(request.COOKIES['id']), day, start_time, end_time)
         return redirect('/my_profile/')
     else:
         return redirect('/my_profile/')
-    
+
+
 def edit_availability(request):
     if request.method == 'POST':
         availability_id = request.POST.get('availability_id')
@@ -158,20 +176,24 @@ def edit_availability(request):
         start_time = request.POST.get('start_time')
         end_time = request.POST.get('end_time')
 
-        Trainers.edit_availability(availability_id, int(request.COOKIES['id']), day, start_time, end_time)
+        Trainers.edit_availability(availability_id, int(
+            request.COOKIES['id']), day, start_time, end_time)
         return redirect('/my_profile/')
     else:
         return redirect('/my_profile/')
-    
+
+
 def delete_availability(request):
     if request.method == 'POST':
         availability_id = request.POST.get('availability_id')
 
-        Trainers.delete_availability(availability_id, int(request.COOKIES['id']))
+        Trainers.delete_availability(
+            availability_id, int(request.COOKIES['id']))
         return redirect('/my_profile/')
     else:
         return redirect('/my_profile/')
-    
+
+
 def search_member(request):
     if request.method == 'POST':
         member_name = request.POST.get('member_name')
@@ -181,18 +203,21 @@ def search_member(request):
         return redirect('/members/' + id + '/')
     else:
         return redirect('/my_profile/')
-    
+
+
 def add_equipment(request):
     if request.method == 'POST':
         equipment_name = request.POST.get('equipment_name')
         last_maintenance = request.POST.get('last_maintenance')
         next_maintenance = request.POST.get('next_maintenance')
 
-        Equipments.add_equipment(equipment_name, last_maintenance, next_maintenance)
+        Equipments.add_equipment(
+            equipment_name, last_maintenance, next_maintenance, int(request.COOKIES['id']))
         return redirect('/my_profile/')
     else:
         return redirect('/my_profile/')
-    
+
+
 def edit_equipment(request):
     if request.method == 'POST':
         equipment_id = request.POST.get('equipment_id')
@@ -200,11 +225,13 @@ def edit_equipment(request):
         last_maintenance = request.POST.get('last_maintenance')
         next_maintenance = request.POST.get('next_maintenance')
 
-        Equipments.edit_equipment(equipment_id, equipment_name, last_maintenance, next_maintenance)
+        Equipments.edit_equipment(
+            equipment_id, equipment_name, last_maintenance, next_maintenance, int(request.COOKIES['id']))
         return redirect('/my_profile/')
     else:
         return redirect('/my_profile/')
-    
+
+
 def delete_equipment(request):
     if request.method == 'POST':
         equipment_id = request.POST.get('equipment_id')
@@ -213,18 +240,21 @@ def delete_equipment(request):
         return redirect('/my_profile/')
     else:
         return redirect('/my_profile/')
-    
+
+
 def add_booking(request):
     if request.method == 'POST':
         room_number = request.POST.get('room_number')
         booking_start_time = request.POST.get('booking_start_time')
         booking_end_time = request.POST.get('booking_end_time')
 
-        RoomBookings.add_booking(int(request.COOKIES['id']), room_number, booking_start_time, booking_end_time)
+        RoomBookings.add_booking(
+            int(request.COOKIES['id']), room_number, booking_start_time, booking_end_time)
         return redirect('/my_profile/')
     else:
         return redirect('/my_profile/')
-    
+
+
 def edit_booking(request):
     if request.method == 'POST':
         booking_id = request.POST.get('booking_id')
@@ -232,11 +262,13 @@ def edit_booking(request):
         booking_start_time = request.POST.get('booking_start_time')
         booking_end_time = request.POST.get('booking_end_time')
 
-        RoomBookings.edit_booking(booking_id, int(request.COOKIES['id']), room_number, booking_start_time, booking_end_time)
+        RoomBookings.edit_booking(booking_id, int(
+            request.COOKIES['id']), room_number, booking_start_time, booking_end_time)
         return redirect('/my_profile/')
     else:
         return redirect('/my_profile/')
-    
+
+
 def delete_booking(request):
     if request.method == 'POST':
         booking_id = request.POST.get('booking_id')
@@ -245,7 +277,8 @@ def delete_booking(request):
         return redirect('/my_profile/')
     else:
         return redirect('/my_profile/')
-    
+
+
 def fitness_classes(request):
     if 'email' in request.COOKIES:
         id = int(request.COOKIES['id'])
@@ -258,7 +291,8 @@ def fitness_classes(request):
             return render(request, 'fitness_class.html', {'user_type': 'ADMINSTAFF', 'classes': classes})
     else:
         return redirect('/login/')
-    
+
+
 def join_fitness_classes(request, id):
     if 'email' in request.COOKIES:
         member_id = int(request.COOKIES['id'])
@@ -266,7 +300,8 @@ def join_fitness_classes(request, id):
         return redirect('/fitness_classes/')
     else:
         return redirect('/fitness_classes/')
-    
+
+
 def leave_fitness_classes(request, id):
     if 'email' in request.COOKIES:
         member_id = int(request.COOKIES['id'])
@@ -274,32 +309,37 @@ def leave_fitness_classes(request, id):
         return redirect('/fitness_classes/')
     else:
         return redirect('/fitness_classes/')
-    
+
+
 def add_class(request):
     if request.method == 'POST':
         trainer_id = request.POST.get('trainer_id')
         day = request.POST.get('day')
         class_start_time = request.POST.get('class_start_time')
-        class_end_time  = request.POST.get('class_end_time')
+        class_end_time = request.POST.get('class_end_time')
 
-        FitnessClasses.add_class(trainer_id, day, class_start_time, class_end_time)
+        FitnessClasses.add_class(
+            trainer_id, day, class_start_time, class_end_time, int(request.COOKIES['id']))
         return redirect('/fitness_classes/')
     else:
         return redirect('/fitness_classes/')
-    
+
+
 def edit_class(request):
     if request.method == 'POST':
         class_id = request.POST.get('class_id')
         trainer_id = request.POST.get('trainer_id')
         day = request.POST.get('day')
         class_start_time = request.POST.get('class_start_time')
-        class_end_time  = request.POST.get('class_end_time')
+        class_end_time = request.POST.get('class_end_time')
 
-        FitnessClasses.edit_class(class_id, trainer_id, day, class_start_time, class_end_time)
+        FitnessClasses.edit_class(
+            class_id, trainer_id, day, class_start_time, class_end_time, int(request.COOKIES['id']))
         return redirect('/fitness_classes/')
     else:
         return redirect('/fitness_classes/')
-    
+
+
 def delete_class(request):
     if request.method == 'POST':
         class_id = request.POST.get('class_id')
@@ -308,3 +348,42 @@ def delete_class(request):
         return redirect('/fitness_classes/')
     else:
         return redirect('/fitness_classes/')
+
+
+def add_session(request):
+    if request.method == 'POST':
+        trainer_id = request.POST.get('trainer_id')
+        day = request.POST.get('day')
+        session_start_time = request.POST.get('session_start_time')
+        session_end_time = request.POST.get('session_end_time')
+
+        TrainingSessions.add_session(
+            int(request.COOKIES['id']), trainer_id, day, session_start_time, session_end_time)
+        return redirect('/my_profile/')
+    else:
+        return redirect('/my_profile/')
+
+
+def edit_session(request):
+    if request.method == 'POST':
+        session_id = request.POST.get('session_id')
+        trainer_id = request.POST.get('trainer_id')
+        day = request.POST.get('day')
+        session_start_time = request.POST.get('session_start_time')
+        session_end_time = request.POST.get('session_end_time')
+
+        TrainingSessions.edit_session(
+            session_id, int(request.COOKIES['id']), trainer_id, day, session_start_time, session_end_time)
+        return redirect('/my_profile/')
+    else:
+        return redirect('/my_profile/')
+
+
+def delete_session(request):
+    if request.method == 'POST':
+        session_id = request.POST.get('session_id')
+
+        TrainingSessions.delete_session(session_id)
+        return redirect('/my_profile/')
+    else:
+        return redirect('/my_profile/')

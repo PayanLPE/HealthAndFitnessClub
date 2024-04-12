@@ -71,8 +71,11 @@ CREATE TABLE FitnessClasses
     day  VARCHAR(255) NOT NULL,
     class_start_time TIME,
     class_end_time   TIME,
+    admin_staff_id INT NOT NULL,
     FOREIGN KEY (trainer_id)
-        REFERENCES Trainers (trainer_id)
+        REFERENCES Trainers (trainer_id),
+    FOREIGN KEY (admin_staff_id)
+        REFERENCES AdministrativeStaff (admin_staff_id)
 );
 
 CREATE TABLE FitnessClassMembers
@@ -102,7 +105,10 @@ CREATE TABLE Equipments
     equipment_id     SERIAL PRIMARY KEY,
     equipment_name   VARCHAR(255) NOT NULL,
     last_maintenance DATE         NOT NULL,
-    next_maintenance DATE         NOT NULL
+    next_maintenance DATE         NOT NULL,
+    admin_staff_id INT NOT NULL,
+    FOREIGN KEY (admin_staff_id)
+        REFERENCES AdministrativeStaff (admin_staff_id)
 );
 
 CREATE TABLE Payments

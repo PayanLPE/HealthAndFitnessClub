@@ -31,6 +31,38 @@
         </li>
         {% endfor %}
     </ul>
+
+    <!-- Fitness Classes -->
+    <h3>My Fitness Classes: </h3>
+    <ul>
+        {% for class in classes %}
+        <li>Class ID: {{ class.class_id }}
+            <ul>
+                <li>Trainer: {{ class.trainer_name }}</li>
+                <li>Trainer ID: {{ class.trainer_id }}</li>
+                <li>Day: {{ class.day }}</li>
+                <li>Class Start Time: {{ class.class_start_time }}</li>
+                <li>Class End Time: {{ class.class_end_time }}</li>
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Training Session -->
+    <h3>My Training Sessions: </h3>
+    <ul>
+        {% for session in sessions %}
+        <li>Training Session ID: {{ session.session_id }}
+            <ul>
+                <li>Trainer: {{ session.trainer_name }}</li>
+                <li>Trainer ID: {{ session.trainer_id }}</li>
+                <li>Day: {{ session.day }}</li>
+                <li>Session Start Time: {{ session.session_start_time }}</li>
+                <li>Session End Time: {{ session.session_end_time }}</li>
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
     {% if error %}
     <script>
         alert("{{ error }}");

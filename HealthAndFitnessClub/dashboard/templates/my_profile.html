@@ -114,11 +114,69 @@
                 <li>Day: {{ class.day }}</li>
                 <li>Class Start Time: {{ class.class_start_time }}</li>
                 <li>Class End Time: {{ class.class_end_time }}</li>
+                <li>Participants: </li>
+                <ul>
+                    {% for member in class.members %}
+                    <li>{{ member }}</li>
+                    {% endfor %}
+                </ul>
             </ul>
         </li>
         {% endfor %}
     </ul>
     <button onclick="location.href='/fitness_classes/'">Edit Fitness Classes</button><br><br>
+
+    <!-- Training Session -->
+    <h3>My Training Sessions: </h3>
+    <ul>
+        {% for session in sessions %}
+        <li>Training Session ID: {{ session.session_id }}
+            <ul>
+                <li>Trainer: {{ session.trainer_name }}</li>
+                <li>Trainer ID: {{ session.trainer_id }}</li>
+                <li>Day: {{ session.day }}</li>
+                <li>Session Start Time: {{ session.session_start_time }}</li>
+                <li>Session End Time: {{ session.session_end_time }}</li>
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+    <h5>Add an Training Session: </h5>
+    <form id="updateForm" method="post" action="add_session">
+        {% csrf_token %}
+        <label for="trainer_id">Trainer ID</label>
+        <input type="text" id="trainer_id" name="trainer_id" required><br><br>
+        <label for="day">Day:</label>
+        <input type="text" id="day" name="day" required><br><br>
+        <label for="session_start_time">Session Start Time:</label>
+        <input type="text" id="session_start_time" name="session_start_time" required><br><br>
+		<label for="session_end_time">Session End Time:</label>
+        <input type="text" id="session_end_time" name="session_end_time" required><br><br>
+        <input type="submit" value="Add session"><br><br>
+    </form>
+    <h5>Edit an Training Session: </h5>
+    <form id="updateForm" method="post" action="edit_session">
+        {% csrf_token %}
+        <label for="session_id">Session ID:</label>
+        <input type="text" id="session_id" name="session_id" required><br><br>
+        <label for="trainer_id">Trainer ID</label>
+        <input type="text" id="trainer_id" name="trainer_id" required><br><br>
+        <label for="day">Day:</label>
+        <input type="text" id="day" name="day" required><br><br>
+        <label for="session_start_time">Session Start Time:</label>
+        <input type="text" id="session_start_time" name="session_start_time" required><br><br>
+		<label for="session_end_time">Session End Time:</label>
+        <input type="text" id="session_end_time" name="session_end_time" required><br><br>
+        <input type="submit" value="Edit session"><br><br>
+    </form>
+    <h5>Delete an Training Session: </h5>
+    <form id="updateForm" method="post" action="delete_session">
+        {% csrf_token %}
+        <label for="session_id">Session ID:</label>
+        <input type="text" id="session_id" name="session_id" required><br><br>
+        <input type="submit" value="Delete session"><br><br>
+    </form>
+    
 
     {% elif user_type == 'TRAINER' %}
     <!-- Trainer -->

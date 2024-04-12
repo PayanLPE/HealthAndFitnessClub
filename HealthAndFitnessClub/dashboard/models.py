@@ -203,6 +203,7 @@ class Equipments(models.Model):
     equipment_name = models.CharField(max_length=255, null=False)
     last_maintenance = models.DateField()
     next_maintenance = models.DateField()
+    admin_staff_id = models.IntegerField()
 
     class Meta:
         managed = False
@@ -213,15 +214,16 @@ class Equipments(models.Model):
         return Equipments.objects.filter()
     
     @staticmethod
-    def add_equipment(equipment_name, last_maintenance, next_maintenance):
-        Equipments.objects.create(equipment_name=equipment_name, last_maintenance=last_maintenance, next_maintenance=next_maintenance)
+    def add_equipment(equipment_name, last_maintenance, next_maintenance, admin_staff_id):
+        Equipments.objects.create(equipment_name=equipment_name, last_maintenance=last_maintenance, next_maintenance=next_maintenance, admin_staff_id=admin_staff_id)
     
     @staticmethod
-    def edit_equipment(equipment_id, equipment_name, last_maintenance, next_maintenance):
+    def edit_equipment(equipment_id, equipment_name, last_maintenance, next_maintenance, admin_staff_id):
         equipment = Equipments.objects.filter(equipment_id=equipment_id).first()
         equipment.equipment_name = equipment_name
         equipment.last_maintenance = last_maintenance
         equipment.next_maintenance = next_maintenance
+        equipment.next_maintenance = admin_staff_id
 
         equipment.save()
     
@@ -268,6 +270,7 @@ class FitnessClasses(models.Model):
     day = models.CharField(max_length=255, null=False)
     class_start_time = models.TimeField()
     class_end_time = models.TimeField()
+    admin_staff_id = models.IntegerField()
 
     class Meta:
         managed = False
@@ -291,23 +294,23 @@ class FitnessClasses(models.Model):
         return FitnessClasses.objects.filter(class_id=class_id)
     
     @staticmethod
-    def add_class(trainer_id, day, class_start_time, class_end_time):
+    def add_class(trainer_id, day, class_start_time, class_end_time, admin_staff_id):
         availabilities = Availabilities.objects.filter(trainer_id=trainer_id, day=day)
 
         check = False
         for time in availabilities:
-            if time.start_time <= datetime.datetime.strptime(class_start_time, '%I:%M').time() and time.end_time > datetime.datetime.strptime(class_end_time, '%I:%M').time():
+            if time.start_time <= datetime.datetime.strptime(class_start_time, '%H:%M').time() and time.end_time > datetime.datetime.strptime(class_end_time, '%H:%M').time():
                 check = True
         if check:
-            FitnessClasses.objects.create(trainer_id=trainer_id, day=day, class_start_time=class_start_time, class_end_time=class_end_time)
+            FitnessClasses.objects.create(trainer_id=trainer_id, day=day, class_start_time=class_start_time, class_end_time=class_end_time, admin_staff_id=admin_staff_id)
     
     @staticmethod
-    def edit_class(class_id, trainer_id, day, class_start_time, class_end_time):
+    def edit_class(class_id, trainer_id, day, class_start_time, class_end_time, admin_staff_id):
         availabilities = Availabilities.objects.filter(trainer_id=trainer_id, day=day)
 
         check = False
         for time in availabilities:
-            if time.start_time <= datetime.datetime.strptime(class_start_time, '%I:%M').time() and time.end_time > datetime.datetime.strptime(class_end_time, '%I:%M').time():
+            if time.start_time <= datetime.datetime.strptime(class_start_time, '%H:%M').time() and time.end_time > datetime.datetime.strptime(class_end_time, '%H:%M').time():
                 check = True
         if check:
             c = FitnessClasses.objects.filter(class_id=class_id).first()
@@ -315,6 +318,7 @@ class FitnessClasses(models.Model):
             c.day = day
             c.class_start_time = class_start_time
             c.class_end_time = class_end_time
+            c.admin_staff_id = admin_staff_id
             c.save()
     
     @staticmethod
@@ -357,5 +361,61 @@ class FitnessClassMembers(models.Model):
             c.trainer_name = Trainers.find_trainer_with_id(c.trainer_id).first_name + " " + Trainers.find_trainer_with_id(c.trainer_id).last_name
             classes.append(c)
 
+            participants = FitnessClassMembers.get_all_members(c.class_id)
+            names = []
+            for p in participants:
+                names.append(Members.find_member_with_id(p.member_id).first_name + ' '+ Members.find_member_with_id(p.member_id).last_name)
+            c.members = names
+
         return classes
-            
+
+class TrainingSessions(models.Model):
+    session_id = models.AutoField(primary_key=True)
+    member_id = models.IntegerField()
+    day = models.CharField(max_length=255, null=False)
+    trainer_id = models.IntegerField()
+    session_start_time = models.TimeField()
+    session_end_time = models.TimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'trainingsessions'
+
+    @staticmethod
+    def get_sessions_by_member_id(member_id):
+        sessions = TrainingSessions.objects.filter(member_id=member_id)
+        for s in sessions:
+            s.trainer_name = Trainers.find_trainer_with_id(s.trainer_id).first_name + " " + Trainers.find_trainer_with_id(s.trainer_id).last_name
+        return sessions
+    
+    @staticmethod
+    def add_session(member_id, trainer_id, day, session_start_time, session_end_time):
+        availabilities = Availabilities.objects.filter(trainer_id=trainer_id, day=day)
+
+        check = False
+        for time in availabilities:
+            if time.start_time <= datetime.datetime.strptime(session_start_time, '%H:%M').time() and time.end_time > datetime.datetime.strptime(session_end_time, '%H:%M').time():
+                check = True
+        if check:
+            TrainingSessions.objects.create(member_id=member_id, trainer_id=trainer_id, day=day, session_start_time=session_start_time, session_end_time=session_end_time)
+    
+    @staticmethod
+    def edit_session(session_id, member_id, trainer_id, day, session_start_time, session_end_time):
+        availabilities = Availabilities.objects.filter(trainer_id=trainer_id, day=day)
+
+        check = False
+        for time in availabilities:
+            if time.start_time <= datetime.datetime.strptime(session_start_time, '%H:%M').time() and time.end_time > datetime.datetime.strptime(session_end_time, '%H:%M').time():
+                check = True
+        if check:
+            c = TrainingSessions.objects.filter(session_id=session_id).first()
+            c.member_id = member_id
+            c.trainer_id = trainer_id
+            c.day = day
+            c.session_start_time = session_start_time
+            c.session_end_time = session_end_time
+            c.save()
+    
+    @staticmethod
+    def delete_session(session_id):
+        TrainingSessions.objects.filter(session_id=session_id).first().delete() 
