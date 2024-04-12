@@ -2,7 +2,7 @@
 Kina Zhan 101254727
 Peien Liu 101221020
 
-# Group Members
+# Technology Used
 Python + PostgreSQL
 
 # Module required
