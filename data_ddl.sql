@@ -56,7 +56,8 @@ CREATE TABLE TrainingSessions
     member_id    INT NOT NULL,
     day  VARCHAR(255) NOT NULL,
     trainer_id   INT NOT NULL,
-    session_time TIME,
+    session_start_time TIME,
+    session_end_time   TIME,
     FOREIGN KEY (member_id)
         REFERENCES Members (member_id),
     FOREIGN KEY (trainer_id)

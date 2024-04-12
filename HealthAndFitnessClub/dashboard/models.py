@@ -1,3 +1,4 @@
+import datetime
 from django.db import models
 
 # Create your models here.
@@ -291,17 +292,30 @@ class FitnessClasses(models.Model):
     
     @staticmethod
     def add_class(trainer_id, day, class_start_time, class_end_time):
-        FitnessClasses.objects.create(trainer_id=trainer_id, day=day, class_start_time=class_start_time, class_end_time=class_end_time)
+        availabilities = Availabilities.objects.filter(trainer_id=trainer_id, day=day)
+
+        check = False
+        for time in availabilities:
+            if time.start_time <= datetime.datetime.strptime(class_start_time, '%I:%M').time() and time.end_time > datetime.datetime.strptime(class_end_time, '%I:%M').time():
+                check = True
+        if check:
+            FitnessClasses.objects.create(trainer_id=trainer_id, day=day, class_start_time=class_start_time, class_end_time=class_end_time)
     
     @staticmethod
     def edit_class(class_id, trainer_id, day, class_start_time, class_end_time):
-        c = FitnessClasses.objects.filter(class_id=class_id).first()
-        c.trainer_id = trainer_id
-        c.day = day
-        c.class_start_time = class_start_time
-        c.class_end_time = class_end_time
-         
-        c.save()
+        availabilities = Availabilities.objects.filter(trainer_id=trainer_id, day=day)
+
+        check = False
+        for time in availabilities:
+            if time.start_time <= datetime.datetime.strptime(class_start_time, '%I:%M').time() and time.end_time > datetime.datetime.strptime(class_end_time, '%I:%M').time():
+                check = True
+        if check:
+            c = FitnessClasses.objects.filter(class_id=class_id).first()
+            c.trainer_id = trainer_id
+            c.day = day
+            c.class_start_time = class_start_time
+            c.class_end_time = class_end_time
+            c.save()
     
     @staticmethod
     def delete_class(class_id):
